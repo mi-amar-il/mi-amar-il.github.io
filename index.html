@@ -21,7 +21,7 @@
    the two candidates as white buttons with blue type and a cut-out portrait standing on the button's top edge. */
 :root{
   --blue:#0038b8; --blue-deep:#002a8a; --blue-soft:#cfdcf8; --white:#ffffff;
-  --good:#0d8a4e; --bad:#c62828;
+  --good:#0d8a4e; --panel:160px; --bad:#c62828;
   --f-display:"Heebo","Arial Hebrew",Arial,sans-serif;
   --f-quote:"Frank Ruhl Libre","David",Georgia,serif;
   color-scheme:light;
@@ -29,7 +29,12 @@
 html,body{height:100%}
 body{background:var(--blue);color:var(--white);font-family:var(--f-display);font-size:17px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:600px;margin:0 auto;padding-block:clamp(10px,2.5vh,28px) 24px;display:flex;flex-direction:column;gap:clamp(10px,2.4vh,26px)}
+main{max-width:600px;margin:0 auto;box-sizing:border-box;height:100dvh;overflow-y:auto;
+  padding-top:clamp(8px,2vh,24px);padding-bottom:calc(var(--panel) + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;gap:clamp(8px,1.6vh,20px)}
+main.done{padding-bottom:24px}
+#game{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+#game > div{flex:1 1 auto;min-height:0}
 .mast{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
 h1{font-weight:900;font-size:clamp(28px,8vw,44px);line-height:.95;margin:0;letter-spacing:-.02em;text-wrap:balance}
 .lede{margin:0;max-width:40ch;color:var(--blue-soft);font-size:16px}
@@ -39,7 +44,7 @@ h1{font-weight:900;font-size:clamp(28px,8vw,44px);line-height:.95;margin:0;lette
 .dots i.ok{background:var(--white)}
 .dots i.no{background:rgba(255,255,255,.25)}
 .dots i.now{background:var(--blue-soft);box-shadow:0 0 0 3px rgba(255,255,255,.25)}
-.sheet{position:relative;padding-top:6px;height:clamp(130px,30vh,250px);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sheet{position:relative;padding-top:6px;flex:1 1 auto;min-height:90px;max-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 blockquote::before,blockquote::after{font-family:var(--f-quote);font-weight:700;font-size:1.9em;line-height:0;color:var(--blue-soft);position:relative;top:.32em}
 blockquote::before{content:"״";margin-left:.12em}
 blockquote::after{content:"״";margin-right:.12em}
@@ -73,9 +78,9 @@ blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500
 .slip.fade{opacity:.4}
 .mark{font-size:14px;font-weight:900;margin-top:4px}
 .slip.right .mark{color:#7ff0b0} .slip.wrong .mark{color:#ffb3ad}
-.reveal{display:flex;flex-direction:column;gap:10px;align-items:stretch;text-align:center;
+.reveal{display:flex;flex-direction:column;gap:6px;align-items:stretch;text-align:center;
   position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--blue-deep);
-  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
   box-shadow:0 -14px 30px -12px rgba(0,0,0,.55);animation:sheet .35s ease both}
 .reveal > *{max-width:600px;width:100%;margin-inline:auto}
 @keyframes sheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -92,7 +97,8 @@ blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500
 .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .row .btn{flex:1 1 160px}
 .note{font-size:13px;color:var(--blue-soft);margin:0;text-align:center}
-@media (prefers-reduced-motion:reduce){.reveal{animation:none}.slip,.face{transition:none;animation:none!important}.face{transform:none!important;opacity:1!important}.slip:hover:not(:disabled),.slip:hover:not(:disabled) .face{transform:none}}
+@keyframes rise{0%{transform:translateY(14%);opacity:0}100%{transform:translateY(0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.reveal{animation:none}.slip{transition:none;animation:none!important}.face.go{animation:rise .9s ease-out both!important}.slip:hover:not(:disabled),.slip:hover:not(:disabled) .face{transform:none}}
 </style>
 
 </head>
@@ -162,6 +168,7 @@ blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500
   }
 
   function render(){
+    document.querySelector('main').classList.remove('done');
     root.replaceChildren();
     if (idx >= round.length) return renderEnd();
     const {q, options} = round[idx];
@@ -200,6 +207,7 @@ blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500
   }
 
   function renderEnd(){
+    document.querySelector('main').classList.add('done');
     const score = answers.filter(Boolean).length;
     const verdict = VERDICTS.find(v => score >= v.min);
     const wrap = el('div'); wrap.style.cssText='display:flex;flex-direction:column;gap:18px';
