@@ -39,11 +39,11 @@ h1{font-weight:900;font-size:clamp(28px,8vw,44px);line-height:.95;margin:0;lette
 .dots i.ok{background:var(--white)}
 .dots i.no{background:rgba(255,255,255,.25)}
 .dots i.now{background:var(--blue-soft);box-shadow:0 0 0 3px rgba(255,255,255,.25)}
-.sheet{position:relative;padding-top:10px}
+.sheet{position:relative;padding-top:6px;height:clamp(130px,30vh,250px);display:flex;align-items:center;justify-content:center;overflow:hidden}
 blockquote::before,blockquote::after{font-family:var(--f-quote);font-weight:700;font-size:1.9em;line-height:0;color:var(--blue-soft);position:relative;top:.32em}
 blockquote::before{content:"״";margin-left:.12em}
 blockquote::after{content:"״";margin-right:.12em}
-blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500;font-size:clamp(21px,min(7.4vw,4.4vh),40px);line-height:1.35;text-wrap:pretty}
+blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500;font-size:clamp(24px,7.4vw,40px);line-height:1.35;text-wrap:pretty}
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
 @media (max-width:360px){.choices{grid-template-columns:1fr}}
 .slip{appearance:none;font:inherit;color:var(--white);background:transparent;border:0;border-radius:16px;--stroke:var(--white);
@@ -132,6 +132,16 @@ blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500
   }
 
   function preload(list){ list.forEach(p => { if (p.img){ const im = new Image(); im.src = p.img; } }); }
+  // Shrink the quote's font until it fits its fixed box, so long quotes never push the buttons down.
+  function fitQuote(){
+    const box = document.querySelector('.sheet'); const bq = box && box.querySelector('blockquote');
+    if (!bq) return;
+    bq.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(bq).fontSize);
+    while (bq.scrollHeight > box.clientHeight - 6 && size > 14){ size -= 1; bq.style.fontSize = size + 'px'; }
+  }
+  window.addEventListener('resize', fitQuote);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitQuote);
   function newRound(){
     const lib = shuffle(BANK.quotes.filter(q => q.side==='lib')).slice(0, PER_SIDE);
     const illib = shuffle(BANK.quotes.filter(q => q.side==='illib')).slice(0, PER_SIDE);
@@ -170,6 +180,7 @@ blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500
     });
     wrap.append(sheet, choices, reveal);
     root.appendChild(wrap);
+    fitQuote();
   }
 
   function choose(o, btn, choices, reveal, q){
