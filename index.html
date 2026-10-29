@@ -97,6 +97,19 @@ blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500
 .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .row .btn{flex:1 1 160px}
 .note{font-size:13px;color:var(--blue-soft);margin:0;text-align:center}
+/* Desktop: quote on the right, the two MKs large on the left, answer panel centered below. */
+@media (min-width:1000px) and (min-height:600px){
+  main{max-width:1240px;gap:clamp(12px,2.5vh,28px)}
+  h1{font-size:clamp(40px,4.2vw,56px)}
+  #game > div{display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:center;gap:clamp(32px,4vw,64px)}
+  .sheet{max-height:none;height:clamp(260px,56vh,560px)}
+  blockquote{font-size:clamp(34px,3.4vw,54px)}
+  .choices{gap:clamp(18px,2vw,32px)}
+  .stage{height:clamp(220px,44vh,400px)}
+  .name{font-size:22px}.party{font-size:15px}.pos{font-size:14px}
+  .reveal > *{max-width:820px}
+  .verdict{font-size:28px}.src{font-size:18px}
+}
 @keyframes rise{0%{transform:translateY(14%);opacity:0}100%{transform:translateY(0);opacity:1}}
 @media (prefers-reduced-motion:reduce){.reveal{animation:none}.slip{transition:none;animation:none!important}.slip:hover:not(:disabled),.slip:hover:not(:disabled) .face{transform:none}}
 </style>
