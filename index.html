@@ -170,19 +170,27 @@ blockquote{margin:0;text-align:center;font-family:var(--f-quote);font-weight:500
     const lib = take('lib'), illib = take('illib');
     // Build the round one card at a time so nobody who appeared in the previous card
     // (speaker or the other option) shows up again in the next one.
-    const queue = (first ? [first] : []).concat(shuffle(lib.concat(illib)));
-    round = []; let prev = new Set();
-    while (queue.length){
-      let i = queue.findIndex(q => !prev.has(q.mk));
-      if (i < 0) i = 0;
-      const q = queue.splice(i, 1)[0];
-      const other = q.side === 'lib' ? 'illib' : 'lib';
-      const base = (q.decoys && q.decoys.length) ? q.decoys : BANK.roster[other].filter(p => p.mk !== q.mk && (!q.women || p.f));
-      const fresh = base.filter(p => !prev.has(p.mk));
-      const decoy = pick(fresh.length ? fresh : (base.length ? base : BANK.roster[other].filter(p => p.mk !== q.mk)));
-      round.push({q, options: shuffle([{mk:q.mk, party:q.party, pos:q.pos, img:q.img, real:true}, Object.assign({real:false}, decoy)])});
-      prev = new Set([q.mk, decoy.mk]);
-    }
+    const build = () => {
+      const queue = (first ? [first] : []).concat(shuffle(lib.concat(illib)));
+      const out = []; let prev = new Set(), clean = true;
+      while (queue.length){
+        let i = queue.findIndex(q => !prev.has(q.mk));
+        if (i < 0){ i = 0; clean = false; }
+        const q = queue.splice(i, 1)[0];
+        const other = q.side === 'lib' ? 'illib' : 'lib';
+        const base = (q.decoys && q.decoys.length) ? q.decoys : BANK.roster[other].filter(p => p.mk !== q.mk && (!q.women || p.f));
+        const fresh = base.filter(p => !prev.has(p.mk));
+        if (!fresh.length) clean = false;
+        const decoy = pick(fresh.length ? fresh : (base.length ? base : BANK.roster[other].filter(p => p.mk !== q.mk)));
+        out.push({q, options: shuffle([{mk:q.mk, party:q.party, pos:q.pos, img:q.img, real:true}, Object.assign({real:false}, decoy)])});
+        prev = new Set([q.mk, decoy.mk]);
+      }
+      return {out, clean};
+    };
+    // Reshuffle until no MK repeats in back-to-back cards (almost always on the first try).
+    let built = build();
+    for (let t = 0; t < 200 && !built.clean; t++) built = build();
+    round = built.out;
     idx = 0; answers = [];
     preload(round.flatMap(r => r.options));
     render();
